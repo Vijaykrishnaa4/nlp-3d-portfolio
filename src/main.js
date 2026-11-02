@@ -10,8 +10,8 @@ class PortfolioApp {
     this.maxStars = 10;
     this.currentQuizIndex = 0;
 
-    this.mamPhoto = localStorage.getItem('mam_photo') || null;
-    this.studentPhoto = localStorage.getItem('student_photo') || null;
+    this.mamPhoto = localStorage.getItem('mam_photo') || `${import.meta.env.BASE_URL}mam.jpg`;
+    this.studentPhoto = localStorage.getItem('student_photo') || `${import.meta.env.BASE_URL}student.jpg`;
 
     this.init();
   }
@@ -38,6 +38,7 @@ class PortfolioApp {
     // 4. Setup Controls
     this.setupNavigation();
     this.setupPhotoUploaders();
+    this.setupFinale();
     this.setupAudio();
     this.setupCinematicEffects();
   }
@@ -129,6 +130,8 @@ class PortfolioApp {
   }
 
   updatePhotoFrames() {
+    document.querySelectorAll('.js-mam-photo').forEach(el => { el.style.backgroundImage = `url(${this.mamPhoto})`; el.textContent = ''; });
+    document.querySelectorAll('.js-student-photo').forEach(el => { el.style.backgroundImage = `url(${this.studentPhoto})`; el.textContent = ''; });
     const mamFrame = document.getElementById('mam-photo-frame');
     if (mamFrame && this.mamPhoto) {
       mamFrame.style.backgroundImage = `url(${this.mamPhoto})`;
@@ -140,6 +143,43 @@ class PortfolioApp {
       studentFrame.style.backgroundImage = `url(${this.studentPhoto})`;
       studentFrame.innerHTML = '';
     }
+  }
+
+  setupFinale() {
+    const btn = document.getElementById('finale-open-btn');
+    const box = document.getElementById('finale-letter');
+    if (!btn || !box) return;
+    const lines = [
+      "Dear Mam,",
+      "I came into your class afraid of the word \u201cstrict\u201d, and I leave it understanding that strictness was just care wearing a serious face.",
+      "There were days my mind wandered and I missed the thread. But your board, your stories and your pictures stayed with me anyway \u2014 and when the exam came, they carried me through.",
+      "You didn\u2019t just teach me NLP. You taught me that understanding beats memorising, and that a teacher\u2019s patience can outlast a student\u2019s distraction.",
+      "Thank you for every explanation you repeated, every question you asked, and every star you promised us.",
+      "With all my respect and gratitude,",
+      "Vijay Krishnaa S"
+    ];
+    let started = false;
+    btn.addEventListener('click', () => {
+      if (started) return; started = true;
+      btn.disabled = true; btn.textContent = '\u2728 Reading\u2026';
+      box.classList.add('open');
+      let i = 0;
+      const next = () => {
+        if (i >= lines.length) {
+          btn.textContent = '\ud83d\udc9b Thank you, Mam';
+          sound.playStar();
+          confetti({ particleCount: 160, spread: 90, origin: { y: 0.7 }, colors: ['#fbbf24','#f43f5e','#38bdf8','#ffffff'] });
+          return;
+        }
+        const p = document.createElement('p');
+        p.textContent = lines[i];
+        if (i === 0 || i >= lines.length - 2) p.className = 'sig';
+        box.appendChild(p);
+        requestAnimationFrame(() => p.classList.add('in'));
+        i++; setTimeout(next, 1700);
+      };
+      next();
+    });
   }
 
   setupAudio() {
